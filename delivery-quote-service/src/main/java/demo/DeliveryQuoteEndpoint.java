@@ -14,7 +14,7 @@ public class DeliveryQuoteEndpoint {
     @POST
     public Uni<DeliveryResponse> request(DeliveryRequest request) {
         return Uni.createFrom().item(() -> {
-            var perItem = new BigDecimal("3.92").add(BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble(0.40d)));
+            var perItem = new BigDecimal("0.05").add(BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble(0.04d)));
             var count = BigDecimal.valueOf(request.getItems());
 
             var response = new DeliveryResponse();

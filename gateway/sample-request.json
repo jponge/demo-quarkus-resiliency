@@ -1,0 +1,13 @@
+{
+  "products": [
+    {
+      "name": "Baguette",
+      "count": 10
+    },
+    {
+      "name": "Confiture",
+      "count": 3
+    }
+  ],
+  "city": "Lyon"
+}
