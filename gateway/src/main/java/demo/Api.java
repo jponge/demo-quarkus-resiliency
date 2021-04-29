@@ -1,5 +1,6 @@
 package demo;
 
+import io.smallrye.common.annotation.NonBlocking;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -7,6 +8,10 @@ import io.vertx.mutiny.core.Vertx;
 import io.vertx.mutiny.ext.web.client.WebClient;
 import io.vertx.mutiny.ext.web.codec.BodyCodec;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.faulttolerance.CircuitBreaker;
+import org.eclipse.microprofile.faulttolerance.Fallback;
+import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.faulttolerance.Timeout;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -40,6 +45,10 @@ public class Api {
     }
 
     @POST
+    @NonBlocking
+    @Timeout(1000L)
+    @CircuitBreaker(requestVolumeThreshold = 4)
+    @Fallback(fallbackMethod = "processRequestFallback")
     public Uni<JsonObject> processRequest(JsonObject json) {
 
         var city = json.getString("city", "N/A");
@@ -58,6 +67,13 @@ public class Api {
         return Uni.combine()
                 .all().unis(productRequests).combinedWith(JsonArray::new)
                 .onItem().transformToUni(array -> deliveryRequest(city, productCount, array));
+    }
+
+    public Uni<JsonObject> processRequestFallback(JsonObject json) {
+        var response = new JsonObject()
+                .put("error", "We are encountering issues, please retry later")
+                .put("city", json.getString("city"));
+        return Uni.createFrom().item(response);
     }
 
     private Uni<JsonObject> deliveryRequest(String city, int productCount, JsonArray array) {
