@@ -1,0 +1,18 @@
+# Start
+
+toxiproxy-server
+
+./mvnw quarkus:dev -Ddelivery.port=3100
+
+# Create a proxy
+
+toxiproxy-cli create delivery -l localhost:3100 -u localhost:3001
+
+# Toxics
+
+toxiproxy-cli toxic add delivery -t latency -a latency=1000
+
+toxiproxy-cli toxic remove delivery --toxicName latency_downstream
+
+
+
